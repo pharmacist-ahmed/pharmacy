@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام   صيدلية</title>
+    <style>
+        body{
+            font-family: sans-serif;max-width: 500px;margin: 20px auto;
+            background-color: #f5f5f5;}
+         input{
+            padding: 8px;margin: 3px;
+         }   
+         button{
+            padding: 6px 10px; cursor: pointer;
+         }
+         .card{
+            background-color: white;padding: 10px;margin: 8px 0;
+            border-radius: 8px;display: flex; justify-content: space-between;
+         }
+         .low{
+            color: red;font-weight: bold;
+         }
+    </style>
+</head>
+<body>
+    <h1>نظام   صيدلية</h1>
+    <input id="search" placeholder="ابحث" oninput="render()">
+    <input id="newMed" placeholder="دواء جديد">
+    <button onclick="add()">اضافة</button>
+    <div  id="app"></div>
+    <script>
+        let medicines=JSON.parse(localStorage.getItem("pharmacy"))||[
+            {name:"panadol",qty:5},
+            {name:"rivo",qty:2},
+            {name:"fam",qty:1}
+        ]
+        let editIndex=-1;
+        function saveToStorage(){localStorage.setItem("pharmacy",JSON.stringify(medicines));}
+        function render(){
+            let s =document.getElementById("search").value.toLowerCase();
+            document.getElementById("app").innerHTML=medicines.map((m,i)=>{
+            if(!m.name.toLowerCase().includes(s))return "";
+            
+            if(i=== editIndex){
+                return`<div class="card"><input id="editInput" value=${m.name}>
+                    <button onClick="save()">حفظ</button></div>`;
+            }
+            return `<div class="card">
+                <span>${m.name}-${m.qty} ${m.qty <3?'<span class="low">ناقص</span>':''}</span>
+                <span><button onClick="sell(${i})">بيع</button> <button  onClick="startEdit(${i})">تعديل</button>
+                    <button onClick="removeMed(${i})">حذف</button></span>
+                </div>`;
+            }).join('');}
+            window.add=function(){
+               let n= document.getElementById("newMed").value;
+               if(n){medicines.push({name:n ,qty:10});
+               n="";
+               saveToStorage();
+               render()
+            }}
+            window.sell=function(i){
+                if(medicines[i].qty>0){medicines[i].qty--;
+                saveToStorage();
+                render();
+            }}
+            window.removeMed=  function(i){
+                medicines.splice(i,1);
+                saveToStorage();
+                render()
+            }
+            window.startEdit=function(i){
+                editIndex=i ;
+                render();
+            }
+            window.save=function(){
+                let v =document.getElementById("editInput").value;
+                if (v){
+                    medicines[editIndex].name=v;
+                    editIndex=-1;
+                    saveToStorage();
+                    render()
+                }
+            }
+            render();
+            
+    </script>
+    
+</body>
+</html>
